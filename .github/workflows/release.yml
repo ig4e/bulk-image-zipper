@@ -41,11 +41,13 @@ jobs:
           bun build --compile --target=bun-windows-x64 --minify ./src/index.ts --outfile bulk-image-zipper-${{ github.ref_name }}.exe --external sharp --no-sourcemap
 
       - name: Debug Info
+        shell: pwsh
         run: |
           echo "Tag: ${{ github.ref_name }}"
           echo "Event name: ${{ github.event_name }}"
           echo "Actor: ${{ github.actor }}"
-          echo "File size: $(ls -lh bulk-image-zipper-${{ github.ref_name }}.exe | awk '{print $5}')"
+          $file = Get-Item "bulk-image-zipper-${{ github.ref_name }}.exe"
+          echo "File size: $([math]::Round($file.Length / 1MB, 2)) MB"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
