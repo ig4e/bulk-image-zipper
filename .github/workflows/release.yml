@@ -27,9 +27,9 @@ jobs:
           path: |
             ~/.bun
             .bun
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: windows-bun-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            windows-bun-
 
       - name: Install dependencies
         run: |
