@@ -5,16 +5,31 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+
+      - name: Cache Bun
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun
+            .bun
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Install dependencies
         run: bun install
@@ -22,10 +37,17 @@ jobs:
       - name: Build executable
         run: bun build --compile --target=bun-windows-x64 --minify --sourcemap ./src/index.ts --outfile bulk-image-zipper-${{ github.ref_name }}.exe
 
+      - name: Debug Info
+        run: |
+          echo "Tag: ${{ github.ref_name }}"
+          echo "Event name: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: bulk-image-zipper-${{ github.ref_name }}.exe
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          prerelease: false
