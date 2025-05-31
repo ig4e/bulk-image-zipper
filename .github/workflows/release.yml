@@ -25,7 +25,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.bun
+            ${{ runner.tool_cache }}/bun
             .bun
           key: windows-bun-${{ hashFiles('**/bun.lockb') }}
           restore-keys: |
@@ -38,16 +38,17 @@ jobs:
 
       - name: Build executable
         run: |
-          bun build --compile --target=bun-windows-x64 --minify ./src/index.ts --outfile bulk-image-zipper-${{ github.ref_name }}.exe --external sharp --no-sourcemap
+          bun build --compile --target=bun-windows-x64 --minify ./src/index.ts --outfile bulk-image-zipper-${{ github.ref_name }}.exe --no-sourcemap
 
       - name: Debug Info
         shell: pwsh
         run: |
-          echo "Tag: ${{ github.ref_name }}"
-          echo "Event name: ${{ github.event_name }}"
-          echo "Actor: ${{ github.actor }}"
-          $file = Get-Item "bulk-image-zipper-${{ github.ref_name }}.exe"
-          echo "File size: $([math]::Round($file.Length / 1MB, 2)) MB"
+          Write-Host "Tag: ${{ github.ref_name }}"
+          Write-Host "Event name: ${{ github.event_name }}"
+          Write-Host "Actor: ${{ github.actor }}"
+          $file = Get-Item -Path "bulk-image-zipper-${{ github.ref_name }}.exe"
+          $sizeMB = [math]::Round($file.Length / 1MB, 2)
+          Write-Host "File size: $sizeMB MB"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
